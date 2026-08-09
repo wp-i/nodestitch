@@ -213,7 +213,7 @@ not retain an independent canonical node list.
 - Folder/repository stem: `nodestitch`
 - Package stem: `nodestitch`
 - Public bundle identifier: `app.nodestitch.desktop`.
-- Public repository URL: recorded after GitHub repository creation.
+- Public repository URL: `https://github.com/wp-i/nodestitch`.
 
 The name describes text nodes stitched into one continuing planning line.
 
@@ -264,9 +264,9 @@ The name describes text nodes stitched into one continuing planning line.
   either add or archive. Fast SQLite commits did not expose the delayed saving
   indicator, avoiding a one-frame status flash. Reduced-motion preferences
   bypass non-essential motion.
-- **Gate F — in progress.** The owner approved the MIT License and the public
+- **Gate F — complete.** The owner approved the MIT License and the public
   bundle identifier is finalized as `app.nodestitch.desktop`. Contribution,
   security, conduct, CI, ignore, dependency, copied-source, asset, secret, and
   machine-path checks are in place. The MIT-licensed `desktop-taskBoard`
-  installer-hook pattern is recorded in `THIRD_PARTY_NOTICES.md`. Record and
-  verify the final public repository URL when the GitHub repository is created.
+  installer-hook pattern is recorded in `THIRD_PARTY_NOTICES.md`. The public
+  repository is published and verified at `https://github.com/wp-i/nodestitch`.
