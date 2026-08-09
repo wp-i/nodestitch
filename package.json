@@ -2,7 +2,7 @@
   "name": "nodestitch",
   "private": true,
   "version": "0.1.0",
-  "description": "A restrained, local-first timeline planner for Windows.",
+  "description": "一款纯本地、轻量克制的 Windows 桌面时间线任务规划工具。",
   "type": "module",
   "scripts": {
     "dev": "vite",

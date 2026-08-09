@@ -1,105 +1,102 @@
-# Nodestitch
+<p align="center">
+  <img src="src-tauri/icons/128x128.png" width="112" alt="Nodestitch 图标">
+</p>
 
-Nodestitch is a lightweight, local-first desktop planner that turns an ongoing
-plan into a simple line of editable text nodes.
+<h1 align="center">Nodestitch</h1>
 
-## Core scope
+<p align="center">
+  一款纯本地、轻量克制的 Windows 桌面时间线任务规划工具。
+</p>
 
-- Maintain one continuously growing, single-axis timeline.
-- Add node text with an automatic, read-only creation timestamp.
-- Classify nodes with a green, blue, or red circular marker; green is the
-  default, and users decide what each color means for their own workflow.
-- Edit existing nodes in place and drag them into a new order.
-- Archive deleted nodes into read-only history instead of erasing them.
-- Reach archived nodes through one icon-only `View history` control.
-- Persist the timeline locally across restarts.
+<p align="center">
+  <a href="https://github.com/wp-i/nodestitch/actions/workflows/ci.yml"><img alt="持续集成" src="https://github.com/wp-i/nodestitch/actions/workflows/ci.yml/badge.svg"></a>
+  <img alt="Windows 10" src="https://img.shields.io/badge/Windows-10-0078D4?logo=windows">
+  <img alt="Tauri 2" src="https://img.shields.io/badge/Tauri-2-24C8DB?logo=tauri&logoColor=white">
+  <a href="LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/badge/license-MIT-green"></a>
+</p>
 
-The working application now covers this complete core loop. It deliberately
-does not include accounts, sync, reminders, priorities, restore actions, or a
-second status/tag system.
+## 亮点
 
-## Interaction language
+- **一条持续生长的时间线**：所有计划都沿同一条轴线排列，不引入看板、层级或复杂配置。
+- **快速整理节点**：添加文字、双击编辑、拖动排序和归档删除都在主界面完成。
+- **三种自由定义的颜色**：绿色、蓝色和红色只负责视觉分类，不预设优先级或状态含义。
+- **不可编辑的创建时间**：节点创建后自动记录日期与时间，编辑、换色和排序不会改变它。
+- **删除但不遗忘**：删除会把完整节点移入只读历史，再次点击时钟按钮即可回到时间线。
+- **纯本地、无账号**：节点、顺序和历史保存在本机 SQLite，不需要登录，不提供云同步，也不加入遥测。
+- **克制的桌面体验**：以适合小窗口的类 iOS 视觉语言呈现，控制文本尽量精简，并为新增、归档和排序提供短促平滑的动画。
+- **完整的 Windows 入口**：支持 NSIS 安装包、开始菜单和桌面快捷方式，普通启动不会显示控制台窗口。
 
-- The window uses a compact, restrained iOS-inspired visual language without
-  imitating a phone frame or Ant Design components.
-- The regular desktop window opens at 520 x 760 logical pixels, remains
-  resizable down to 320 x 500, and uses an opaque edge without a decorative
-  outer border or transparent-window halo.
-- The primary view has no generic timeline title, node count, color label, or
-  text inside the history and add controls.
-- Icon controls do not show native hover-title tooltips; their accessible names
-  remain available to assistive technology.
-- The history clock stays in place and toggles between history and the active
-  timeline. The title bar contains minimize and close only, with no maximize or
-  fullscreen action.
-- The product mark is a light single-axis timeline on deep neutral graphite,
-  without a lettermark or blue filled background. The node archive action uses
-  a conventional trash glyph rather than a download symbol.
-- Double-click node text to edit it in place. Press Enter to commit or Escape
-  to cancel; Shift+Enter inserts a line break.
-- Drag the grip to reorder. With the grip focused, Alt+Up/Down reorders and
-  Enter starts editing.
-- Click a node marker to cycle its color. Colors are intentionally semantic-free.
-- Node entry, archival, and committed reordering use short iOS-style motion;
-  reduced-motion preferences disable non-essential transitions, and fast local
-  writes do not flash a transient saving indicator.
+## 界面预览
 
-## Technical direction
+| 主时间线 | 历史节点 |
+| --- | --- |
+| ![Nodestitch 主时间线](artifacts/readme-timeline.png) | ![Nodestitch 历史节点](artifacts/readme-history.png) |
 
-- Tauri 2
-- React
-- TypeScript
-- SQLite persistence behind an explicit repository boundary
-- Windows 10 as the first acceptance platform
+## 使用方式
 
-See [`PROJECT_HANDOFF.md`](PROJECT_HANDOFF.md) for confirmed requirements,
-open product decisions, and implementation gates. Every contribution must also
-follow [`AGENTS.md`](AGENTS.md).
+1. 在底部输入下一步计划，可选择绿色、蓝色或红色圆点，然后点击加号添加节点。
+2. 双击节点文字进入原位编辑，按 `Enter` 保存，按 `Esc` 取消，按 `Shift + Enter` 换行。
+3. 拖动节点右侧把手调整顺序；聚焦把手后也可使用 `Alt + ↑/↓` 排序。
+4. 点击节点圆点可依次切换三种颜色，颜色含义完全由使用者决定。
+5. 点击垃圾桶按钮把节点移入只读历史；点击右上角时钟按钮查看历史，再次点击返回时间线。
+6. 创建时间只用于展示：当天节点显示时分，较早节点显示月日与时分。
 
-## Development
+## Windows 兼容性
 
-Prerequisites are the standard Tauri 2 Windows toolchain, Node.js, npm, and
-Rust. Install and run the desktop app with:
+| 环境 | 当前验证状态 |
+| --- | --- |
+| Windows 10 x64 | 已完成原生窗口、缩放、滚动、交互、持久化、安装包、桌面快捷方式和无控制台冷启动验证 |
+| Windows 11 x64 | 尚未完成完整验收，不作正式兼容性声明 |
+| Windows 11 ARM64 | 暂无原生安装包，也未完成验证 |
+
+当前验证环境为 Windows 10 22H2（内部版本 19045），显示缩放为 200%。安装包尚未购买代码签名证书，Windows 可能显示来源提示；正式发布后请只从本仓库发布页下载安装包。
+
+## 技术栈
+
+- Tauri 2 / Rust：Windows 窗口行为、SQLite 边界与原生安装包
+- React 19 / TypeScript / Vite：界面与交互
+- SQLite / rusqlite：本地持久化的唯一数据源
+
+窗口控制、领域状态和持久化分别维护边界。React 组件只消费已经提交的快照并发送操作命令，不作为第二份数据源。
+
+## 本地开发
+
+需要 Node.js、npm、Rust 稳定版、Microsoft C++ 生成工具和 WebView2。
 
 ```powershell
 npm install
 npm run tauri dev
 ```
 
-Useful verification commands:
+常用检查：
 
 ```powershell
 npm test
 npm run build
-cd src-tauri
-cargo test
+cargo test --manifest-path src-tauri/Cargo.toml
+cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
 ```
 
-Build the Windows NSIS installer with `npm run tauri build`. The installer,
-installed executable, and required desktop shortcut use the same Nodestitch
-product mark; uninstalling removes the desktop shortcut. Build outputs,
-screenshots, dependency directories, and local user data are ignored by Git.
-Windows release builds use the GUI subsystem and must never expose a console
-window during ordinary desktop-shortcut startup.
+构建 Windows NSIS 安装包：
 
-The production state owner is `TimelineController`; React subscribes to its
-committed snapshot, while the Rust boundary validates and atomically writes one
-versioned document to SQLite. Failed writes do not publish an in-memory state
-that differs from disk. On Windows, the database lives in the application data
-directory selected by Tauri for the bundle identifier.
+```powershell
+npm run tauri build
+```
 
-## Name
+安装包生成在 `src-tauri/target/release/bundle/nsis/`。默认窗口尺寸为 `520 × 760` 个逻辑像素，最小可缩放到 `320 × 500`。
 
-Each node is stitched into one continuing plan: **Nodestitch**. The canonical
-product name is `Nodestitch`; the repository, package, and folder stem is
-`nodestitch`.
+生产环境的状态所有者是 `TimelineController`。Rust 边界会校验时间线文档，并通过事务把一个带版本的数据快照原子写入 SQLite；写入失败时，不会发布与磁盘不一致的内存状态。
 
-## Open-source status
+## 隐私
 
-Nodestitch is open-source software available under the
-[MIT License](LICENSE). The public bundle identifier is
-`app.nodestitch.desktop`. Adapted third-party implementation details and their
-licenses are recorded in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
+Nodestitch 不需要注册账号，也不会主动联网同步计划。应用数据保存在 Tauri 为 `app.nodestitch.desktop` 分配的本地应用数据目录中。WebView2 缺失时，Windows 安装流程可能需要联网获取运行环境。
 
-Contributions are welcome; see [`CONTRIBUTING.md`](CONTRIBUTING.md) and
-[`SECURITY.md`](SECURITY.md) before opening a pull request or security report.
+## 参与贡献
+
+欢迎提交缺陷、Windows 真实环境验证记录和聚焦于现有产品边界的改进。开始前请阅读 [贡献指南](CONTRIBUTING.md) 和 [安全政策](SECURITY.md)。涉及窗口、焦点、拖动、缩放或动画的修改，请附真实 Windows 截图或录屏。
+
+所有修改都必须遵循 [项目规则](AGENTS.md) 与 [交付记录](PROJECT_HANDOFF.md) 中已经确认的产品边界。
+
+## 许可证与第三方说明
+
+源代码和仓库内原创视觉资产以 [MIT 许可证](LICENSE) 发布。直接依赖、参考实现与相应许可证见 [第三方说明](THIRD_PARTY_NOTICES.md)。

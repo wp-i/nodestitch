@@ -1,7 +1,7 @@
 [package]
 name = "nodestitch"
 version = "0.1.0"
-description = "A restrained, local-first timeline planner for Windows"
+description = "一款纯本地、轻量克制的 Windows 桌面时间线任务规划工具"
 authors = ["Nodestitch contributors"]
 edition = "2024"
 
