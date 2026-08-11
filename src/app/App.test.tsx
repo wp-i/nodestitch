@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { TimelineController } from "../application/TimelineController";
 import { EMPTY_TIMELINE, MARKER_COLORS, createNode, type TimelineDocument } from "../domain/timeline";
 import type { TimelineRepository } from "../persistence/TimelineRepository";
@@ -95,5 +95,30 @@ describe("App", () => {
     expect(scrollContainer.querySelectorAll(".timeline-card .timeline-node")).toHaveLength(10);
     const longCopy = screen.getByText("这是一个用于验证窄窗口自动换行且不会横向溢出的较长节点内容");
     expect(longCopy.closest(".node-content")).not.toBeNull();
+  });
+
+  it("expands a long node editor to its content height when editing starts", async () => {
+    const repository = new MemoryRepository();
+    repository.document = createNode(EMPTY_TIMELINE, {
+      id: "node-long",
+      text: "这是一个会在窄窗口中自动换成多行、双击后应当直接获得合适编辑高度的长文本节点。",
+      createdAt: 100,
+      color: "green",
+    });
+    const scrollHeight = vi
+      .spyOn(HTMLElement.prototype, "scrollHeight", "get")
+      .mockReturnValue(118);
+
+    try {
+      const controller = new TimelineController(repository);
+      render(<App controller={controller} />);
+
+      const nodeCopy = await screen.findByText(repository.document.activeNodes[0].text);
+      fireEvent.doubleClick(nodeCopy.closest("button")!);
+
+      expect(screen.getByLabelText("编辑节点 1")).toHaveStyle({ height: "118px" });
+    } finally {
+      scrollHeight.mockRestore();
+    }
   });
 });

@@ -133,12 +133,16 @@ function ActiveNodeRow({
     if (!editing) setDraft(node.text);
   }, [editing, node.text]);
 
-  useEffect(() => {
-    if (editing) {
-      editRef.current?.focus();
-      editRef.current?.setSelectionRange(draft.length, draft.length);
-    }
-  }, [draft.length, editing]);
+  useLayoutEffect(() => {
+    if (!editing) return;
+    const editor = editRef.current;
+    if (!editor) return;
+
+    editor.style.height = "auto";
+    editor.style.height = `${editor.scrollHeight}px`;
+    editor.focus();
+    editor.setSelectionRange(draft.length, draft.length);
+  }, [editing]);
 
   const finishEditing = async () => {
     if (committingRef.current) return;
