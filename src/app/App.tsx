@@ -139,7 +139,8 @@ function ActiveNodeRow({
     if (!editor) return;
 
     editor.style.height = "auto";
-    editor.style.height = `${editor.scrollHeight}px`;
+    const borderHeight = editor.offsetHeight - editor.clientHeight;
+    editor.style.height = `${editor.scrollHeight + borderHeight}px`;
     editor.focus();
     editor.setSelectionRange(draft.length, draft.length);
   }, [editing]);

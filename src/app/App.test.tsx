@@ -108,6 +108,12 @@ describe("App", () => {
     const scrollHeight = vi
       .spyOn(HTMLElement.prototype, "scrollHeight", "get")
       .mockReturnValue(118);
+    const offsetHeight = vi
+      .spyOn(HTMLElement.prototype, "offsetHeight", "get")
+      .mockReturnValue(55);
+    const clientHeight = vi
+      .spyOn(HTMLElement.prototype, "clientHeight", "get")
+      .mockReturnValue(53);
 
     try {
       const controller = new TimelineController(repository);
@@ -116,9 +122,13 @@ describe("App", () => {
       const nodeCopy = await screen.findByText(repository.document.activeNodes[0].text);
       fireEvent.doubleClick(nodeCopy.closest("button")!);
 
-      expect(screen.getByLabelText("编辑节点 1")).toHaveStyle({ height: "118px" });
+      const editor = screen.getByLabelText("编辑节点 1");
+      expect(editor).toHaveStyle({ height: "120px" });
+      expect(getComputedStyle(editor).maxHeight).toBe("none");
     } finally {
       scrollHeight.mockRestore();
+      offsetHeight.mockRestore();
+      clientHeight.mockRestore();
     }
   });
 });

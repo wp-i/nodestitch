@@ -350,7 +350,6 @@ button.node-marker {
   display: block;
   width: 100%;
   min-height: 53px;
-  max-height: 132px;
   resize: vertical;
   padding: 8px 9px;
   border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--stroke));
