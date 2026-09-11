@@ -26,6 +26,12 @@ describe("timeline domain", () => {
     expect(edited.activeNodes[0]).toMatchObject({ text: "修复后的文本", color: "red", createdAt: 100 });
   });
 
+  it("validates and preserves the preferred editor height", () => {
+    const edited = editNode(first(), "a", "edited text", 180);
+    expect(edited.activeNodes[0]).toMatchObject({ editorHeight: 180, createdAt: 100 });
+    expect(() => editNode(first(), "a", "edited text", 52)).toThrow(TimelineRuleError);
+  });
+
   it("reorders nodes and normalizes explicit order", () => {
     let document = first();
     document = createNode(document, { id: "b", text: "B", createdAt: 101 });

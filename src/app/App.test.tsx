@@ -131,4 +131,41 @@ describe("App", () => {
       clientHeight.mockRestore();
     }
   });
+
+  it("keeps the editor adaptive while typing and preserves a manual height", async () => {
+    const repository = new MemoryRepository();
+    repository.document = createNode(EMPTY_TIMELINE, {
+      id: "node-resizable",
+      text: "短文本",
+      createdAt: 100,
+    });
+    const scrollHeight = vi
+      .spyOn(HTMLElement.prototype, "scrollHeight", "get")
+      .mockReturnValue(80);
+
+    try {
+      const controller = new TimelineController(repository);
+      render(<App controller={controller} />);
+
+      const nodeCopy = await screen.findByText("短文本");
+      fireEvent.doubleClick(nodeCopy.closest("button")!);
+      const editor = screen.getByLabelText("编辑节点 1");
+      expect(editor).toHaveStyle({ height: "80px" });
+
+      scrollHeight.mockReturnValue(150);
+      fireEvent.change(editor, { target: { value: "This text should grow automatically while editing." } });
+      expect(editor).toHaveStyle({ height: "150px" });
+
+      editor.style.height = "180px";
+      fireEvent.mouseUp(editor);
+      fireEvent.blur(editor);
+      await waitFor(() => expect(repository.document.activeNodes[0].editorHeight).toBe(180));
+
+      const updatedCopy = await screen.findByText("This text should grow automatically while editing.");
+      fireEvent.doubleClick(updatedCopy.closest("button")!);
+      expect(screen.getByLabelText("编辑节点 1")).toHaveStyle({ height: "180px" });
+    } finally {
+      scrollHeight.mockRestore();
+    }
+  });
 });

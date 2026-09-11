@@ -40,6 +40,8 @@ pub struct TimelineNode {
     text: String,
     created_at: u64,
     color: MarkerColor,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    editor_height: Option<u64>,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -50,6 +52,8 @@ pub struct ArchivedNode {
     text: String,
     created_at: u64,
     color: MarkerColor,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    editor_height: Option<u64>,
     archived_at: u64,
 }
 
@@ -78,6 +82,7 @@ impl TimelineDocument {
         let mut ids = HashSet::new();
         for (index, node) in self.active_nodes.iter().enumerate() {
             validate_common(&mut ids, &node.id, node.order, &node.text, node.created_at)?;
+            validate_editor_height(node.editor_height)?;
             if node.order != index as u64 {
                 return Err(PersistenceError::Invalid("节点顺序不连续".into()));
             }
@@ -85,6 +90,7 @@ impl TimelineDocument {
 
         for node in &self.archived_nodes {
             validate_common(&mut ids, &node.id, node.order, &node.text, node.created_at)?;
+            validate_editor_height(node.editor_height)?;
             if node.archived_at > MAX_SAFE_INTEGER {
                 return Err(PersistenceError::Invalid("归档时间超出安全范围".into()));
             }
@@ -114,6 +120,15 @@ fn validate_common(
     }
     if created_at > MAX_SAFE_INTEGER {
         return Err(PersistenceError::Invalid("创建时间超出安全范围".into()));
+    }
+    Ok(())
+}
+
+fn validate_editor_height(editor_height: Option<u64>) -> Result<(), PersistenceError> {
+    if let Some(height) = editor_height {
+        if height < 53 || height > MAX_SAFE_INTEGER {
+            return Err(PersistenceError::Invalid("editor height is invalid".into()));
+        }
     }
     Ok(())
 }
@@ -220,6 +235,7 @@ mod tests {
                 text: text.into(),
                 created_at: 100,
                 color: MarkerColor::Green,
+                editor_height: Some(120),
             }],
             archived_nodes: Vec::new(),
         }
@@ -296,6 +312,7 @@ mod tests {
                 text: "   ".into(),
                 created_at: 100,
                 color: MarkerColor::Blue,
+                editor_height: None,
             }],
             archived_nodes: Vec::new(),
         };

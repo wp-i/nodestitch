@@ -86,8 +86,8 @@ export class TimelineController {
     ).then(() => id);
   }
 
-  edit(id: string, text: string): Promise<void> {
-    return this.commit((document) => editNode(document, id, text));
+  edit(id: string, text: string, editorHeight?: number): Promise<void> {
+    return this.commit((document) => editNode(document, id, text, editorHeight));
   }
 
   recolor(id: string, color: MarkerColor): Promise<void> {

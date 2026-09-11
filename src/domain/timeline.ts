@@ -1,4 +1,5 @@
 export const MARKER_COLORS = ["green", "blue", "red"] as const;
+export const MIN_EDITOR_HEIGHT = 53;
 
 export type MarkerColor = (typeof MARKER_COLORS)[number];
 
@@ -8,6 +9,8 @@ export interface TimelineNode {
   readonly text: string;
   readonly createdAt: number;
   readonly color: MarkerColor;
+  /** The user's preferred inline-editor height, in CSS pixels. */
+  readonly editorHeight?: number;
 }
 
 export interface ArchivedNode extends TimelineNode {
@@ -51,6 +54,13 @@ function assertMarkerColor(color: string): asserts color is MarkerColor {
   }
 }
 
+function assertEditorHeight(value: number | undefined): void {
+  if (value === undefined) return;
+  if (!Number.isSafeInteger(value) || value < MIN_EDITOR_HEIGHT) {
+    throw new TimelineRuleError("Editor height is invalid");
+  }
+}
+
 export function assertTimelineDocument(document: TimelineDocument): void {
   if (document.schemaVersion !== 1) {
     throw new TimelineRuleError("不支持的数据版本");
@@ -68,6 +78,7 @@ export function assertTimelineDocument(document: TimelineDocument): void {
     assertText(node.text);
     assertTimestamp(node.createdAt, "创建时间");
     assertMarkerColor(node.color);
+    assertEditorHeight(node.editorHeight);
   });
 
   document.archivedNodes.forEach((node) => {
@@ -85,6 +96,7 @@ export function assertTimelineDocument(document: TimelineDocument): void {
       throw new TimelineRuleError("归档时间早于创建时间");
     }
     assertMarkerColor(node.color);
+    assertEditorHeight(node.editorHeight);
   });
 }
 
@@ -127,13 +139,19 @@ export function createNode(
   ]);
 }
 
-export function editNode(document: TimelineDocument, id: string, text: string): TimelineDocument {
+export function editNode(
+  document: TimelineDocument,
+  id: string,
+  text: string,
+  editorHeight?: number,
+): TimelineDocument {
   assertText(text);
+  assertEditorHeight(editorHeight);
   let found = false;
   const activeNodes = document.activeNodes.map((node) => {
     if (node.id !== id) return node;
     found = true;
-    return { ...node, text };
+    return editorHeight === undefined ? { ...node, text } : { ...node, text, editorHeight };
   });
   if (!found) throw new TimelineRuleError("节点不存在");
   return nextDocument(document, activeNodes);

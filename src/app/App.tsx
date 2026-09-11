@@ -18,6 +18,7 @@ import {
 import type { TimelineController } from "../application/TimelineController";
 import {
   MARKER_COLORS,
+  MIN_EDITOR_HEIGHT,
   type ArchivedNode,
   type MarkerColor,
   type TimelineNode,
@@ -115,7 +116,7 @@ function ActiveNodeRow({
   readonly disabled: boolean;
   readonly dragOver: boolean;
   readonly exiting: boolean;
-  readonly onEdit: (text: string) => Promise<void>;
+  readonly onEdit: (text: string, editorHeight?: number) => Promise<void>;
   readonly onRecolor: (color: MarkerColor) => void;
   readonly onArchive: () => void;
   readonly onMove: (direction: -1 | 1) => void;
@@ -128,10 +129,18 @@ function ActiveNodeRow({
   const [draft, setDraft] = useState(node.text);
   const editRef = useRef<HTMLTextAreaElement>(null);
   const committingRef = useRef(false);
+  const manualHeightRef = useRef<number | null>(null);
+  const automaticHeightRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!editing) setDraft(node.text);
   }, [editing, node.text]);
+
+  useLayoutEffect(() => {
+    if (!editing) return;
+    manualHeightRef.current = node.editorHeight ?? null;
+    automaticHeightRef.current = null;
+  }, [editing]);
 
   useLayoutEffect(() => {
     if (!editing) return;
@@ -140,20 +149,47 @@ function ActiveNodeRow({
 
     editor.style.height = "auto";
     const borderHeight = editor.offsetHeight - editor.clientHeight;
-    editor.style.height = `${editor.scrollHeight + borderHeight}px`;
+    const contentHeight = Math.max(MIN_EDITOR_HEIGHT, editor.scrollHeight + borderHeight);
+    const height = Math.max(contentHeight, manualHeightRef.current ?? 0);
+    editor.style.height = `${height}px`;
+    automaticHeightRef.current = height;
+  }, [draft, editing]);
+
+  useEffect(() => {
+    if (!editing) return;
+    const editor = editRef.current;
+    if (!editor) return;
     editor.focus();
     editor.setSelectionRange(draft.length, draft.length);
   }, [editing]);
 
+  const captureManualHeight = () => {
+    const editor = editRef.current;
+    if (!editor || automaticHeightRef.current === null) return;
+    const rectHeight = editor.getBoundingClientRect().height;
+    const currentHeight = Math.round(
+      rectHeight || editor.offsetHeight || Number.parseFloat(editor.style.height),
+    );
+    if (
+      Number.isFinite(currentHeight) &&
+      currentHeight >= MIN_EDITOR_HEIGHT &&
+      currentHeight !== automaticHeightRef.current
+    ) {
+      manualHeightRef.current = currentHeight;
+    }
+  };
+
   const finishEditing = async () => {
     if (committingRef.current) return;
-    if (draft === node.text) {
+    captureManualHeight();
+    const editorHeight = manualHeightRef.current ?? undefined;
+    if (draft === node.text && editorHeight === node.editorHeight) {
       setEditing(false);
       return;
     }
     committingRef.current = true;
     try {
-      await onEdit(draft);
+      await onEdit(draft, editorHeight);
       setEditing(false);
     } finally {
       committingRef.current = false;
@@ -216,10 +252,12 @@ function ActiveNodeRow({
             className="node-editor"
             aria-label={`编辑节点 ${index + 1}`}
             value={draft}
-            rows={Math.min(5, Math.max(2, draft.split("\n").length))}
+            rows={2}
             disabled={disabled}
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={handleEditorKeyDown}
+            onMouseUp={captureManualHeight}
+            onTouchEnd={captureManualHeight}
             onBlur={() => ignoreRejected(finishEditing())}
           />
         ) : (
@@ -333,7 +371,7 @@ function TimelineList({ controller, nodes, pending, enteringId }: {
           disabled={pending || exitingId !== null}
           dragOver={dragOverId === node.id && draggingId !== node.id}
           exiting={exitingId === node.id}
-          onEdit={(text) => controller.edit(node.id, text)}
+          onEdit={(text, editorHeight) => controller.edit(node.id, text, editorHeight)}
           onRecolor={(color) => ignoreRejected(controller.recolor(node.id, color))}
           onArchive={() => void archiveWithMotion(node.id)}
           onMove={(direction) => {
