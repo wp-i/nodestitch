@@ -160,11 +160,12 @@ textarea:disabled {
 }
 
 .content-scroll {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   min-height: 0;
   flex: 1 1 auto;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   overscroll-behavior: contain;
   scroll-padding-block: 12px;
   scrollbar-color: rgba(126, 126, 137, 0.3) transparent;
@@ -242,7 +243,12 @@ textarea:disabled {
 }
 
 .timeline-card {
-  overflow: hidden;
+  min-height: 0;
+  max-height: 100%;
+  flex: 0 1 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .timeline-node {

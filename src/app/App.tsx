@@ -564,13 +564,14 @@ export function App({ controller }: AppProps) {
     void nextAnimationFrame().then(() => nextAnimationFrame()).then(() => {
       const content = contentRef.current;
       if (!content) return;
-      if (typeof content.scrollTo === "function") {
-        content.scrollTo({
-          top: content.scrollHeight,
+      const scrollTarget = content.querySelector<HTMLElement>(".timeline-card") ?? content;
+      if (typeof scrollTarget.scrollTo === "function") {
+        scrollTarget.scrollTo({
+          top: scrollTarget.scrollHeight,
           behavior: prefersReducedMotion() ? "auto" : "smooth",
         });
       } else {
-        content.scrollTop = content.scrollHeight;
+        scrollTarget.scrollTop = scrollTarget.scrollHeight;
       }
     });
   };
