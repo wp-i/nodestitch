@@ -493,17 +493,19 @@ function HistoryView({ nodes, onToggle }: { readonly nodes: readonly ArchivedNod
           <Clock3 aria-hidden="true" />
         </button>
       </div>
-      {ordered.length ? (
+      <div className="content-scroll">
+        {ordered.length ? (
         <section className="timeline-card history-card" aria-label="历史节点">
-          {ordered.map((node, index) => (
+            {ordered.map((node, index) => (
             <ArchivedNodeRow key={node.id} node={node} isLast={index === ordered.length - 1} />
-          ))}
+            ))}
         </section>
       ) : (
         <div className="empty-history" role="status" aria-label="暂无历史节点">
           <Clock3 aria-hidden="true" />
         </div>
       )}
+      </div>
     </main>
   );
 }
@@ -551,7 +553,7 @@ export function App({ controller }: AppProps) {
   const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
   const [showHistory, setShowHistory] = useState(false);
   const [enteringId, setEnteringId] = useState<string | null>(null);
-  const contentRef = useRef<HTMLElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     void controller.start();
@@ -593,27 +595,29 @@ export function App({ controller }: AppProps) {
             </button>
           </div>
 
-          {snapshot.status === "loading" ? (
+          <div ref={contentRef} className="content-scroll">
+            {snapshot.status === "loading" ? (
             <div className="loading-state" role="status" aria-label="正在读取时间线">
               <span />
             </div>
           ) : (
             <>
-              {snapshot.document.activeNodes.length > 0 && (
-                <TimelineList
+                {snapshot.document.activeNodes.length > 0 && (
+                  <TimelineList
+                    controller={controller}
+                    nodes={snapshot.document.activeNodes}
+                    pending={snapshot.pending}
+                    enteringId={enteringId}
+                  />
+                )}
+                <Composer
                   controller={controller}
-                  nodes={snapshot.document.activeNodes}
-                  pending={snapshot.pending}
-                  enteringId={enteringId}
+                  pending={snapshot.pending || snapshot.status === "error"}
+                  onAdded={handleAdded}
                 />
-              )}
-              <Composer
-                controller={controller}
-                pending={snapshot.pending || snapshot.status === "error"}
-                onAdded={handleAdded}
-              />
             </>
           )}
+          </div>
         </main>
       )}
 

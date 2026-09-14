@@ -90,8 +90,10 @@ describe("App", () => {
     const { container } = render(<App controller={controller} />);
 
     await waitFor(() => expect(container.querySelectorAll(".timeline-card .node-copy")).toHaveLength(10));
-    const scrollContainer = container.querySelector<HTMLElement>(".app-content")!;
-    expect(scrollContainer).toHaveClass("app-content");
+    const appContent = container.querySelector<HTMLElement>(".app-content")!;
+    const scrollContainer = container.querySelector<HTMLElement>(".content-scroll")!;
+    expect(appContent).toHaveClass("app-content");
+    expect(scrollContainer.parentElement).toBe(appContent);
     expect(scrollContainer.querySelectorAll(".timeline-card .timeline-node")).toHaveLength(10);
     const longCopy = screen.getByText("这是一个用于验证窄窗口自动换行且不会横向溢出的较长节点内容");
     expect(longCopy.closest(".node-content")).not.toBeNull();
